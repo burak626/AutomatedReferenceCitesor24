@@ -1,0 +1,1212 @@
+{
+  "name": "AutomatedReferenceCitesor24",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        -560
+      ],
+      "id": "1df8018b-0cea-490a-82c6-596e02ce2ed6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "VoHMb7O55rqzXqOK",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"references\": \"\\n\\nReferences\\n• International Journal of Otorhinolaryngology (IJORL). Diagnostic role of laryngoscopy in ENT disorders. https://www.ijorl.com/index.php/ijorl/article/view/4188\\n• JAMA Otolaryngology–Head & Neck Surgery. Clinical outcomes of diagnostic laryngoscopy. https://jamanetwork.com/journals/jamaotolaryngology/fullarticle/2797692\\n• National Center for Biotechnology Information (NCBI). Laryngoscopy in diagnosis of ENT diseases. https://pmc.ncbi.nlm.nih.gov/articles/PMC6587150/\\n• MSD Manuals. Laryngoscopy. https://www.msdmanuals.com/en-in/professional/ear,-nose,-and-throat-disorders/diagnosis-of-ear,-nose,-and-throat-disorders/laryngoscopy\\n\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1056,
+        -560
+      ],
+      "id": "1484a43b-427b-4edc-a959-13c97f89620a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4",
+          "mode": "list",
+          "cachedResultName": "ENT _ Otolaryngology",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 587167360,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit#gid=587167360"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -304
+      ],
+      "id": "967dc597-527d-4e2e-aee8-cec831400625",
+      "name": "Get all Article IDs",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SHzE2FQJawAWxNLt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $json['Article ID'] }}/{{ $json['Article ID'] }}",
+        "returnAll": true,
+        "filter": {
+          "whatToSearch": "files",
+          "fileTypes": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        464,
+        -304
+      ],
+      "id": "a4b64c20-c4a7-4c98-8ba1-6d8388c55997",
+      "name": "Get All Documents Based on Article IDs",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1iln3jDmF6jflAKq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.id }}",
+        "simple": false
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        -320
+      ],
+      "id": "1e7499a9-1552-4bcd-8489-8023a135a977",
+      "name": "Get Document Content",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "z2HwXmmuZGffbQIW",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=I will provide you only a set of URLs inside clusters.  \n\nUsing each cluster, create separate references in **APA format** for each article.  \nThe result must absolutely be in JSON format exactly as shown in the example below.  \n\nHere is the JSON example (keep exactly this structure and formatting):\n\n{\n  \"references\": \"\\n\\nReferences\\n• International Journal of Otorhinolaryngology (IJORL). Diagnostic role of laryngoscopy in ENT disorders. https://www.ijorl.com/index.php/ijorl/article/view/4188\\n• JAMA Otolaryngology–Head & Neck Surgery. Clinical outcomes of diagnostic laryngoscopy. https://jamanetwork.com/journals/jamaotolaryngology/fullarticle/2797692\\n• National Center for Biotechnology Information (NCBI). Laryngoscopy in diagnosis of ENT diseases. https://pmc.ncbi.nlm.nih.gov/articles/PMC6587150/\\n• MSD Manuals. Laryngoscopy. https://www.msdmanuals.com/en-in/professional/ear,-nose,-and-throat-disorders/diagnosis-of-ear,-nose,-and-throat-disorders/laryngoscopy\\n\"\n}\n\nNow here are the URLs:\n{{ $json['Reliable Resources'] }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI assistant specialized in generating clean and professional reference sections for academic-style articles.  \n\nImportant: You must always use the **think tool** before taking any action, to carefully reason about your steps and outputs.  \n\nYour tasks are:\n- Use the provided tool **SerpAPI** to perform internet searches for the given URLs and extract the most authoritative reference descriptions.  \n- Always create references in **APA format**.  \n- Strictly **avoid including links to hospitals, clinics, or promotional sources**.  \n- Output must always be in **valid JSON format** with the following structure:\n\n{\n  \"references\": \"References\\n• [Reference 1 in APA style]\\n• [Reference 2 in APA style]\\n• [Reference 3 in APA style]\\n...\"\n}\n\nIf multiple clusters of URLs are provided, generate **separate JSON outputs per cluster**, ensuring each cluster’s references are grouped independently.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -752
+      ],
+      "id": "1d0e7bf3-1b3e-4d57-a6d5-74c3b0142328",
+      "name": "Reference Builder",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('If \"References\" Exist In Document').item.json.documentId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"insertText\": {\n        \"location\": {\n          \"index\": \"{{ $('Get Document Content').item.json.body.content.last().endIndex - 1 }}\"\n        },\n        \"text\": {{ $json['AI Generated References'] }}\n      }\n    },\n    {\n      \"updateTextStyle\": {\n        \"range\": {\n          \"startIndex\": \"{{ $('Get Document Content').item.json.body.content.last().endIndex + 1 }}\",\n          \"endIndex\": \"{{ $('Get Document Content').item.json.body.content.last().endIndex + 11 }}\"\n        },\n        \"textStyle\": {\n          \"bold\": true,\n          \"fontSize\": {\n            \"magnitude\": 13,\n            \"unit\": \"PT\"\n          }\n        },\n        \"fields\": \"bold,fontSize\"\n      }\n    },\n    {\n      \"updateTextStyle\": {\n        \"range\": {\n          \"startIndex\": \"{{ $('Get Document Content').item.json.body.content.last().endIndex + 12 }}\",\n          \"endIndex\": \"{{ $('Get Document Content').item.json.body.content.last().endIndex + 631 }}\"\n        },\n        \"textStyle\": {\n          \"bold\": false,\n          \"fontSize\": {\n            \"magnitude\": 12,\n            \"unit\": \"PT\"\n          }\n        },\n        \"fields\": \"bold,fontSize\"\n      }\n    }\n  ]\n}\n",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1968,
+        -16
+      ],
+      "id": "cb3a9ac5-589b-4aef-9cf4-2efc7366f9a8",
+      "name": "Append References",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "z2HwXmmuZGffbQIW",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Get All Documents Based on Article IDs').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1216,
+        -320
+      ],
+      "id": "bab8f0ba-0766-43a5-b9ae-142df00240a0",
+      "name": "Delete Previous File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1iln3jDmF6jflAKq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v2/files/{{ $json.id }}/copy?convert=true&supportsAllDrives=true",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {}
+      },
+      "id": "21a6054e-5959-4b11-a4ba-f44a76f50f4b",
+      "name": "Duplicate in Docs Format",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1024,
+        -320
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1iln3jDmF6jflAKq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Duplicate in Docs Format').item.json.id }}",
+          "mode": "id"
+        },
+        "newUpdatedFileName": "={{ $('Duplicate in Docs Format').item.json.title.replace(/^Copy of\\s*/, '').trimEnd() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1392,
+        -320
+      ],
+      "id": "f7b0238e-48db-45bd-9096-99869af94812",
+      "name": "Update New File Name, Remove \"Copy of\"",
+      "executeOnce": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1iln3jDmF6jflAKq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1584,
+        -320
+      ],
+      "id": "b8fdb91a-6537-40f5-9fc4-8ad706befc01",
+      "name": "Wait Till Name Updated",
+      "webhookId": "d99d1ef3-cf86-4e23-b44e-46e09c45ce80"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4",
+          "mode": "list",
+          "cachedResultName": "ENT _ Otolaryngology",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 587167360,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit#gid=587167360"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -608
+      ],
+      "id": "b1253528-6ceb-4445-a0fc-d802c8100140",
+      "name": "Get References of Duplicated Docs",
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SHzE2FQJawAWxNLt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -464
+      ],
+      "id": "6d9139bb-744d-47ea-b92c-5e716f132fdc",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4",
+          "mode": "list",
+          "cachedResultName": "ENT _ Otolaryngology",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 587167360,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit#gid=587167360"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Article ID",
+              "lookupValue": "={{ $('Get Document Content').item.json.title.split(' - ')[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        -16
+      ],
+      "id": "33bf0fd6-e709-42e6-b323-e486d969a2d2",
+      "name": "Get \"AI Generated References\"",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SHzE2FQJawAWxNLt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d5270599-d89c-412a-b50b-2fe9410499ed",
+              "leftValue": "={{ $json['AI Generated References'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        -608
+      ],
+      "id": "80f05cd2-afd7-4d52-8dc8-c856280fecf5",
+      "name": "If \"AI Generated References\" Null"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4",
+          "mode": "list",
+          "cachedResultName": "ENT _ Otolaryngology",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 587167360,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit#gid=587167360"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "AI Generated References": "={{ JSON.stringify($('Reference Builder').item.json.output.references) }}",
+            "Article ID": "={{ $('If \"AI Generated References\" Null').item.json['Article ID'] }}"
+          },
+          "matchingColumns": [
+            "Article ID"
+          ],
+          "schema": [
+            {
+              "id": "Article ID",
+              "displayName": "Article ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": " Writer ID",
+              "displayName": " Writer ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Main Keyword",
+              "displayName": "Main Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Details  to Include",
+              "displayName": "Details  to Include",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Secondary Keywords",
+              "displayName": "Secondary Keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Introductory Hook Brief",
+              "displayName": "Introductory Hook Brief",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Reliable Resources",
+              "displayName": "Reliable Resources",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "AI Generated References",
+              "displayName": "AI Generated References",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        -592
+      ],
+      "id": "3a79f3e3-9050-4b64-9ab0-2f2bf996f55c",
+      "name": "Update \"AI Generated References\"",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SHzE2FQJawAWxNLt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b2aa75b8-17e6-4d64-9f9a-28a6093a74df",
+              "leftValue": "={{ JSON.stringify($json).indexOf('References') !== -1 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        -320
+      ],
+      "id": "f644f1e1-8e0a-4e63-9603-1507f37240e1",
+      "name": "If \"References\" Exist In Document"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger",
+        "height": 240,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "10afe2b4-154b-493c-ae56-80d60b185ae7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Get All Rows Without \"AI References\"",
+        "height": 240,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -672
+      ],
+      "typeVersion": 1,
+      "id": "1ebedea9-7f72-4a2b-9a6d-f967333ac14d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Generate \"AI References\"",
+        "height": 368,
+        "width": 512,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        -800
+      ],
+      "typeVersion": 1,
+      "id": "d5438fbc-e2cd-4c3d-b403-08594c64d88d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Update \"AI Generated References\"",
+        "height": 240,
+        "width": 272,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        -672
+      ],
+      "typeVersion": 1,
+      "id": "0094c7bb-9dd0-4dcd-be87-578c16957359",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Get All Documents docs/docx",
+        "height": 240,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "2bd0d157-3fe8-4ea9-8ab1-7bc670d0c0bb",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Update Docx Documents to Docs Format",
+        "height": 240,
+        "width": 736,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "29c6702b-5168-4ae1-8b72-90c771e74e19",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Get All Rows Without \"References\"",
+        "height": 240,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "cb3c5efc-9216-480e-ae49-a2e9fd6fccf0",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Add \"AI Generated References\" to Documents Missing \"References\"",
+        "height": 272,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "3d9c8cd9-c6f6-4e6b-afe2-4fe84e7aa866",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        944,
+        -560
+      ],
+      "id": "33f644d3-d421-4c88-b45f-cad1ac6f7709",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -560
+      ],
+      "id": "ae2e2175-c0c7-4b2e-8eb8-0f99c73b54a4",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "VvtC3qKoNL0GtRpH",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b2aa75b8-17e6-4d64-9f9a-28a6093a74df",
+              "leftValue": "={{ JSON.stringify($json).indexOf('References') !== -1 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "f0cef4fd-e61d-43d8-a0a7-c58aa95f1a4c",
+      "name": "If \"References\" Exist In Document1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.id }}",
+        "simple": false
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -16
+      ],
+      "id": "071e7d30-d2d5-4f6d-86b2-929ab021d14e",
+      "name": "Get Document Content1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "z2HwXmmuZGffbQIW",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $('If \"References\" Exist In Document1').item.json.documentId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"insertText\": {\n        \"location\": {\n          \"index\": \"{{ $('Get Document Content1').item.json.body.content.last().endIndex - 1 }}\"\n        },\n        \"text\": {{ $json['AI Generated References'] }}\n      }\n    },\n    {\n      \"updateTextStyle\": {\n        \"range\": {\n          \"startIndex\": \"{{ $('Get Document Content1').item.json.body.content.last().endIndex + 1 }}\",\n          \"endIndex\": \"{{ $('Get Document Content1').item.json.body.content.last().endIndex + 11 }}\"\n        },\n        \"textStyle\": {\n          \"bold\": true,\n          \"fontSize\": {\n            \"magnitude\": 13,\n            \"unit\": \"PT\"\n          }\n        },\n        \"fields\": \"bold,fontSize\"\n      }\n    },\n    {\n      \"updateTextStyle\": {\n        \"range\": {\n          \"startIndex\": \"{{ $('Get Document Content1').item.json.body.content.last().endIndex + 12 }}\",\n          \"endIndex\": \"{{ $('Get Document Content1').item.json.body.content.last().endIndex + 631 }}\"\n        },\n        \"textStyle\": {\n          \"bold\": false,\n          \"fontSize\": {\n            \"magnitude\": 12,\n            \"unit\": \"PT\"\n          }\n        },\n        \"fields\": \"bold,fontSize\"\n      }\n    }\n  ]\n}\n",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "23f30d64-5027-4434-ae05-a2bd27119f6b",
+      "name": "Append References1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "z2HwXmmuZGffbQIW",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4",
+          "mode": "list",
+          "cachedResultName": "ENT _ Otolaryngology",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 587167360,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1znrHf2InguH2snyRfQcxj0f-N_TRFcwTDR72OkKr4k4/edit#gid=587167360"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Article ID",
+              "lookupValue": "={{ $('Get Document Content1').item.json.title.split(' - ')[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "c5dede5e-0377-43f2-9a17-eefbf52328f6",
+      "name": "Get \"AI Generated References\"1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SHzE2FQJawAWxNLt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Get All Rows Without \"References\"",
+        "height": 240,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "f8a15a57-d7e4-499d-bf32-f52d923f3a50",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Add \"AI Generated References\" to Documents Missing \"References\"",
+        "height": 240,
+        "width": 448,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1104,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "506ab3e4-e72c-441f-bce4-832692b13dc9",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ /\\.docx$/.test($json.name) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "143c8e47-bfd0-4cc6-8b57-bd033844a39d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "docx format"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fb43e8ba-446a-4a25-a3cf-3785457c3c07",
+                    "leftValue": "={{ /\\.docx$/.test($json.name) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "docs format"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        704,
+        -304
+      ],
+      "id": "f15d28c5-3679-4eff-b905-2ae696bce113",
+      "name": "Check Document Format"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get all Article IDs": {
+      "main": [
+        [
+          {
+            "node": "Get All Documents Based on Article IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Documents Based on Article IDs": {
+      "main": [
+        [
+          {
+            "node": "Check Document Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Document Content": {
+      "main": [
+        [
+          {
+            "node": "If \"References\" Exist In Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Reference Builder",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reference Builder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reference Builder": {
+      "main": [
+        [
+          {
+            "node": "Update \"AI Generated References\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Previous File": {
+      "main": [
+        [
+          {
+            "node": "Update New File Name, Remove \"Copy of\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate in Docs Format": {
+      "main": [
+        [
+          {
+            "node": "Delete Previous File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update New File Name, Remove \"Copy of\"": {
+      "main": [
+        [
+          {
+            "node": "Wait Till Name Updated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Till Name Updated": {
+      "main": [
+        [
+          {
+            "node": "Get Document Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get References of Duplicated Docs": {
+      "main": [
+        [
+          {
+            "node": "If \"AI Generated References\" Null",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all Article IDs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get References of Duplicated Docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get \"AI Generated References\"": {
+      "main": [
+        [
+          {
+            "node": "Append References",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If \"AI Generated References\" Null": {
+      "main": [
+        [
+          {
+            "node": "Reference Builder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Update \"AI Generated References\"": {
+      "main": [
+        []
+      ]
+    },
+    "If \"References\" Exist In Document": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get \"AI Generated References\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Reference Builder",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "Reference Builder",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Document Content1": {
+      "main": [
+        [
+          {
+            "node": "If \"References\" Exist In Document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get \"AI Generated References\"1": {
+      "main": [
+        [
+          {
+            "node": "Append References1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If \"References\" Exist In Document1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get \"AI Generated References\"1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Document Format": {
+      "main": [
+        [
+          {
+            "node": "Duplicate in Docs Format",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Document Content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cac3328c-884b-4b6f-993a-0dad2c7174f8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4a2952d750233c02800975f682ffd82d00294fb62c8e98c152bd79f86550ccf2"
+  },
+  "id": "4XCzigHQ7RsQvl86",
+  "tags": []
+}
